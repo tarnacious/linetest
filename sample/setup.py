@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="sample project",
@@ -9,7 +9,8 @@ setup(
     license="BSD",
     keywords="",
     url="",
-    packages=['src', 'test'],
+    packages=find_packages('src'),
+    package_dir={'': 'src'},
     long_description="",
     classifiers=[
         "License :: OSI Approved :: BSD License",
