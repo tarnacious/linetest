@@ -1,7 +1,7 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
-    name="sample project",
+    name="Test Coverage",
     version="0.0.1",
     author="Tarn Barford",
     author_email="tarn@tarnbarford.net",
@@ -9,8 +9,6 @@ setup(
     license="BSD",
     keywords="",
     url="",
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
     long_description="",
     classifiers=[
         "License :: OSI Approved :: BSD License",

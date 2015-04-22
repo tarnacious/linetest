@@ -1,3 +1,6 @@
+print "factorial loaded"
+import sample.another
+
 def factorial(n):
     if n < 0:
         raise ValueError

@@ -1,4 +1,4 @@
-from sample.factorial import factorial
+from factorial import factorial
 
 
 def test_factorial_0():
