@@ -5,6 +5,7 @@ from StringIO import StringIO
 import os, fnmatch
 from imp import find_module, load_source, new_module
 import ast
+import imp
 
 
 
@@ -38,25 +39,19 @@ class Restriction(object):
         print "###", module_name
 
         module = find_module(module_name)
-        print module[0].read()
-        tree = ast.parse(module[0].read())
-        print tree
-        #compiled = compile(tree, filename="<ast>", mode="exec")
-        #print compiled
-
+        text = module[0].read()
+        tree = ast.parse(text)
+        compiled = compile(tree, filename="<ast>", mode="exec")
+        print type(compiled)
         mynamespace = {}
         print ">>>>"
-        #exec(compiled, mynamespace)
+        exec(compiled, mynamespace)
+        #imp.load_source(module_name, compiled)
+        print mynamespace["factorial"](3)
         print "<<<<"
         #import pdb
         #pdb.set_trace()
-        #print mynamespace["factorial"]
-
-        class ns:
-            def factorial(self, n):
-                return 1
-
-        return ns()
+        return mynamespace
         #raise ImportError("Restricted")
 
 print "appending"
