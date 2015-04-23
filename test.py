@@ -6,48 +6,62 @@ import os, fnmatch
 from imp import find_module, load_source, new_module
 import ast
 import imp
-
-
-
-
 import sys
-class Restriction(object):
-    @classmethod
-    def add(cls, module_name):
-        print "add", module_name
+
+def str_node(node):
+    if isinstance(node, ast.AST):
+        fields = [(name, str_node(val)) for name, val in ast.iter_fields(node) if name not in ('left', 'right')]
+        rv = '%s(%s' % (node.__class__.__name__, ', '.join('%s=%s' % field for field in fields))
+        return rv + ')'
+    else:
+        return repr(node)
+def ast_visit(node, level=0):
+    print('  ' * level + str_node(node))
+    for field, value in ast.iter_fields(node):
+        if isinstance(value, list):
+            for item in value:
+                if isinstance(item, ast.AST):
+                    ast_visit(item, level=level+1)
+        elif isinstance(value, ast.AST):
+            ast_visit(value, level=level+1)
+
+class ImportHook(object):
+    def __init__(self):
+        self.name = "initial"
 
     def find_module(self, module_name, package_path):
-        ##print module_name, package_path
+        #print self.name,  module_name, package_path
         if module_name.startswith("factorial"):
-            print "catch factorial", module_name, package_path
             return self
         if module_name.startswith("sample") and package_path:
-        #if module_name.startswith("factorial"):
             print "---", module_name, package_path
-            print "<<"
-            #print module_name.split(".")[0]
-            #module = find_module(module_name.split(".")[0], package_path[0])
-            #print module
             source = load_source(module_name, package_path[0])
             print source
-            #from pdb import set_trace
-            #set_trace()
         return None
-        return self
 
     def load_module(self, module_name):
         print "Load module:", module_name
         module = find_module(module_name)
         text = module[0].read()
         tree = ast.parse(text)
+        #print ast_visit(tree)
+
+        for stmt in ast.walk(tree):
+            if isinstance(stmt, ast.ClassDef):
+                continue
+            print stmt
+            # Ignore non-class
+            if not isinstance(stmt, ast.ClassDef):
+                #print stmt
+                #items = stmt.body
+                #print items[0].lineno #, items[0].names
+                continue
+
         compiled = compile(tree, filename="<ast>", mode="exec")
         mymodule = imp.new_module(module_name)
         exec compiled in mymodule.__dict__
-        mymodule.factorial(3)
         return mymodule
 
-print "appending"
-sys.meta_path.append(Restriction())
 
 src = "sample/src"
 pattern = "*.py"
@@ -75,50 +89,35 @@ def skip(l, i):
 files = list(find_files(src, pattern))
 counts = map(expand_lines, files)
 
-
-
 def run_tests(queue):
     working_dir = os.path.join(os.getcwd())
     stream = StringIO()
     suites = TestLoader(workingDir=working_dir).loadTestsFromDir("./test")
-#    runner = TextTestRunner(stream=stream)
+    runner = TextTestRunner(stream=stream)
     runner = TextTestRunner()
     suites = list(suites)
     baseline = runner.run(suites[0])
-    print baseline
     queue.put(baseline.wasSuccessful())
 
 
 
-def testme():
-    results = []
-
-    for filename in files:
-        with open(filename) as f:
-            lines = f.readlines()
-        for line in range(len(lines)):
-            with open(filename, "w") as f:
-                f.writelines(skip(lines, line))
-
-            pycfiles = list(find_files(src, "*.pyc"))
-            for pycfile in pycfiles:
-                os.remove(pycfile)
-
-            queue = Queue()
-            p = Process(target=run_tests, args=(queue,))
-            p.start()
-            p.join()
-
-            result = queue.get()
-            results.append((filename, line + 1, result))
-
-        # restore file
-        with open(filename, "w") as f:
-            f.writelines(lines)
-
-    for result in results:
-        print result
-
 print "starting"
+
+print "appending"
+hook = ImportHook()
+sys.meta_path.append(hook)
+
+print "test run1"
 q = Queue()
 run_tests(q)
+print q.get()
+#hook.name = "test run one"
+#p = Process(target=run_tests, args=(q,))
+#p.start()
+#p.join()
+#print q.get()
+#hook.name = "test run two"
+#p = Process(target=run_tests, args=(q,))
+#p.start()
+#print q.get()
+#p.join()

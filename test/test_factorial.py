@@ -1,8 +1,3 @@
-import factorial
-print "WOOT"
-print factorial.factorial
-
-
 from factorial import factorial
 
 
