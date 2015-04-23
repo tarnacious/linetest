@@ -36,23 +36,15 @@ class Restriction(object):
         return self
 
     def load_module(self, module_name):
-        print "###", module_name
-
+        print "Load module:", module_name
         module = find_module(module_name)
         text = module[0].read()
         tree = ast.parse(text)
         compiled = compile(tree, filename="<ast>", mode="exec")
-        print type(compiled)
-        mynamespace = {}
-        print ">>>>"
-        exec(compiled, mynamespace)
-        #imp.load_source(module_name, compiled)
-        print mynamespace["factorial"](3)
-        print "<<<<"
-        #import pdb
-        #pdb.set_trace()
-        return mynamespace
-        #raise ImportError("Restricted")
+        mymodule = imp.new_module(module_name)
+        exec compiled in mymodule.__dict__
+        mymodule.factorial(3)
+        return mymodule
 
 print "appending"
 sys.meta_path.append(Restriction())
