@@ -1,4 +1,4 @@
-print "factorial loaded"
+print "factorial loaded", "cat dog"
 import sample.another
 
 def factorial(n):
@@ -11,3 +11,5 @@ def factorial(n):
         for i in range(1, n + 1):
             factorial = factorial * i
         return factorial
+
+print "factorial finished loading"

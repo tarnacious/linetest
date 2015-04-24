@@ -8,6 +8,8 @@ import ast
 import imp
 import sys
 
+from pdb import set_trace
+
 def str_node(node):
     if isinstance(node, ast.AST):
         fields = [(name, str_node(val)) for name, val in ast.iter_fields(node) if name not in ('left', 'right')]
@@ -15,6 +17,7 @@ def str_node(node):
         return rv + ')'
     else:
         return repr(node)
+
 def ast_visit(node, level=0):
     print('  ' * level + str_node(node))
     for field, value in ast.iter_fields(node):
@@ -25,6 +28,17 @@ def ast_visit(node, level=0):
         elif isinstance(value, ast.AST):
             ast_visit(value, level=level+1)
 
+
+class Transformer(ast.NodeTransformer):
+    def visit_Print(self, node):
+        print node.lineno, "print"
+        ast_visit(node)
+        for node2 in node.values:
+            node2.s = node2.s + "!!!"
+        return node
+
+
+
 class ImportHook(object):
     def __init__(self):
         self.name = "initial"
@@ -34,9 +48,10 @@ class ImportHook(object):
         if module_name.startswith("factorial"):
             return self
         if module_name.startswith("sample") and package_path:
-            print "---", module_name, package_path
-            source = load_source(module_name, package_path[0])
-            print source
+            #print "---", module_name, package_path
+            #source = load_source(module_name, package_path[0])
+            #print source
+            pass
         return None
 
     def load_module(self, module_name):
@@ -46,10 +61,13 @@ class ImportHook(object):
         tree = ast.parse(text)
         #print ast_visit(tree)
 
+        node = Transformer().visit(tree)
+
+
         for stmt in ast.walk(tree):
             if isinstance(stmt, ast.ClassDef):
                 continue
-            print stmt
+            #print stmt
             # Ignore non-class
             if not isinstance(stmt, ast.ClassDef):
                 #print stmt
