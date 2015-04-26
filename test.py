@@ -30,28 +30,34 @@ def ast_visit(node, level=0):
 
 
 class Transformer(ast.NodeTransformer):
-    def visit_Print(self, node):
-        print node.lineno, "print"
-        ast_visit(node)
-        for node2 in node.values:
-            node2.s = node2.s + "!!!"
-        return node
+
+    def __init__(self, remove_at=None):
+        self.items = []
+        self.remove_at = remove_at
+
+    def action(self, node):
+        if isinstance(node, ast.stmt):
+            self.items.append((node.lineno, node))
+            print node.lineno, node
+            return True
+        return False
+
+    def visit(self, node):
+        if self.action(node) and len(self.items) == self.remove_at:
+            print "REMOVING", node
+            return None
+        return super(ast.NodeTransformer, self).visit(node)
 
 
-
-class ImportHook(object):
-    def __init__(self):
-        self.name = "initial"
+class ModifyImportHook(object):
+    def __init__(self, module_name, index):
+        self.module_name = module_name
+        self.index = index
+        self.current = 0
 
     def find_module(self, module_name, package_path):
-        #print self.name,  module_name, package_path
-        if module_name.startswith("factorial"):
+        if module_name == self.module_name:
             return self
-        if module_name.startswith("sample") and package_path:
-            #print "---", module_name, package_path
-            #source = load_source(module_name, package_path[0])
-            #print source
-            pass
         return None
 
     def load_module(self, module_name):
@@ -59,55 +65,38 @@ class ImportHook(object):
         module = find_module(module_name)
         text = module[0].read()
         tree = ast.parse(text)
-        #print ast_visit(tree)
-
-        node = Transformer().visit(tree)
-
-
-        for stmt in ast.walk(tree):
-            if isinstance(stmt, ast.ClassDef):
-                continue
-            #print stmt
-            # Ignore non-class
-            if not isinstance(stmt, ast.ClassDef):
-                #print stmt
-                #items = stmt.body
-                #print items[0].lineno #, items[0].names
-                continue
-
+        transformer = Transformer(remove_at=self.index)
+        node = transformer.visit(tree)
         compiled = compile(tree, filename="<ast>", mode="exec")
         mymodule = imp.new_module(module_name)
         exec compiled in mymodule.__dict__
         return mymodule
 
 
-src = "sample/src"
-pattern = "*.py"
+class ImportHook(object):
+    def __init__(self):
+        self.modules = {}
 
-def find_files(directory, pattern):
-    for root, dirs, files in os.walk(directory):
-        for basename in files:
-            if fnmatch.fnmatch(basename, pattern):
-                filename = os.path.join(root, basename)
-                yield filename
+    def find_module(self, module_name, package_path):
+        if module_name.startswith("factorial"):
+            return self
+        return None
 
-def lines(path):
-    return sum(1 for line in open(path))
+    def load_module(self, module_name):
+        print "Load module:", module_name
+        module = find_module(module_name)
+        text = module[0].read()
+        tree = ast.parse(text)
+        transformer = Transformer()
+        node = transformer.visit(tree)
+        self.modules[module_name] = transformer.items
+        compiled = compile(tree, filename="<ast>", mode="exec")
+        mymodule = imp.new_module(module_name)
+        exec compiled in mymodule.__dict__
+        return mymodule
 
-def expand_lines(path):
-    return [(path, line) for line in range(lines(path))]
 
-def flatten(l):
-    return sum(l, [])
-
-def skip(l, i):
-    return l[0:i] + l[i+1:]
-
-
-files = list(find_files(src, pattern))
-counts = map(expand_lines, files)
-
-def run_tests(queue):
+def run_tests():
     working_dir = os.path.join(os.getcwd())
     stream = StringIO()
     suites = TestLoader(workingDir=working_dir).loadTestsFromDir("./test")
@@ -115,27 +104,45 @@ def run_tests(queue):
     runner = TextTestRunner()
     suites = list(suites)
     baseline = runner.run(suites[0])
-    queue.put(baseline.wasSuccessful())
+    return baseline.wasSuccessful()
 
 
+def get_modules(queue):
+    hook = ImportHook()
+    sys.meta_path.append(hook)
+    success = run_tests()
+    queue.put((success, hook.modules))
 
-print "starting"
-
-print "appending"
-hook = ImportHook()
-sys.meta_path.append(hook)
-
-print "test run1"
 q = Queue()
-run_tests(q)
-print q.get()
-#hook.name = "test run one"
-#p = Process(target=run_tests, args=(q,))
-#p.start()
-#p.join()
-#print q.get()
-#hook.name = "test run two"
-#p = Process(target=run_tests, args=(q,))
-#p.start()
-#print q.get()
-#p.join()
+p = Process(target=get_modules, args=(q,))
+p.start()
+p.join()
+(success, modules) = q.get()
+print success, modules
+
+def mutate_and_test(q, module, index):
+    hook = ModifyImportHook(module, index)
+    sys.meta_path.append(hook)
+    result = run_tests()
+    q.put(result)
+
+results = []
+for key in modules.keys():
+    statements = modules[key]
+    for i in range(len(statements)):
+        (line, statement) = statements[i]
+        print "Removing", statement, "on line", line, "in module", key
+        q = Queue()
+        p = Process(target=mutate_and_test, args=(q, key, i))
+        p.start()
+        p.join()
+        if not q.empty():
+            success = q.get()
+        else:
+            success = False
+        results.append((key, line, success))
+        print success
+
+
+for result in results:
+    print result
