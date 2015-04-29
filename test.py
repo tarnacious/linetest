@@ -38,14 +38,15 @@ class Transformer(ast.NodeTransformer):
     def action(self, node):
         if isinstance(node, ast.stmt):
             self.items.append((node.lineno, node))
-            print node.lineno, node
+            #print node.lineno, node
             return True
         return False
 
     def visit(self, node):
+        #print len(self.items), self.remove_at
         if self.action(node) and len(self.items) == self.remove_at:
             print "REMOVING", node
-            return None
+            return ast.Pass()
         return super(ast.NodeTransformer, self).visit(node)
 
 
@@ -61,12 +62,16 @@ class ModifyImportHook(object):
         return None
 
     def load_module(self, module_name):
-        print "Load module:", module_name
+        print "modify module:", module_name, self.index
         module = find_module(module_name)
         text = module[0].read()
         tree = ast.parse(text)
         transformer = Transformer(remove_at=self.index)
         node = transformer.visit(tree)
+
+        ast.fix_missing_locations(tree)
+        #print ast_visit(node)
+        print "^^^"
         compiled = compile(tree, filename="<ast>", mode="exec")
         mymodule = imp.new_module(module_name)
         exec compiled in mymodule.__dict__
@@ -89,6 +94,7 @@ class ImportHook(object):
         tree = ast.parse(text)
         transformer = Transformer()
         node = transformer.visit(tree)
+        print ast_visit(tree)
         self.modules[module_name] = transformer.items
         compiled = compile(tree, filename="<ast>", mode="exec")
         mymodule = imp.new_module(module_name)
@@ -127,22 +133,42 @@ def mutate_and_test(q, module, index):
     q.put(result)
 
 results = []
-for key in modules.keys():
-    statements = modules[key]
-    for i in range(len(statements)):
-        (line, statement) = statements[i]
-        print "Removing", statement, "on line", line, "in module", key
-        q = Queue()
-        p = Process(target=mutate_and_test, args=(q, key, i))
-        p.start()
-        p.join()
-        if not q.empty():
-            success = q.get()
-        else:
-            success = False
-        results.append((key, line, success))
-        print success
+
+def run_fixture():
+    for key in modules.keys():
+        statements = modules[key]
+        for i in range(len(statements)):
+            (line, statement) = statements[i]
+            print "Removing", statement, "on line", line, "in module", key
+            q = Queue()
+            p = Process(target=mutate_and_test, args=(q, key, i))
+            p.start()
+            p.join()
+            if not q.empty():
+                success = q.get()
+            else:
+                success = False
+            results.append((key, line, success, statement))
+            print success
 
 
+
+
+def test():
+    hook = ModifyImportHook("factorial", 9)
+    sys.meta_path.append(hook)
+    try:
+        print "TRY"
+        result = run_tests()
+        print "CATCH", result
+    except:
+        print "ERROR"
+
+
+
+run_fixture()
+#test()
 for result in results:
     print result
+
+#run_fixture()
