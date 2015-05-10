@@ -60,24 +60,64 @@ class ImportHook(object):
         self.modules = {}
 
     def find_module(self, module_name, package_path):
+        print ">", module_name
         if module_name.startswith("factorial"):
             return self
-#        if module_name.startswith("sample"):
-#            return self
+        #if module_name == "sample":
+        #    return self
+        if module_name.startswith("sample"):
+            return self
         return None
 
     def load_module(self, module_name):
         print "Load module:", module_name
-        module = find_module(module_name)
-        text = module[0].read()
-        tree = ast.parse(text)
-        transformer = Transformer()
-        node = transformer.visit(tree)
-        self.modules[module_name] = transformer.items
-        compiled = compile(tree, filename="<ast>", mode="exec")
-        mymodule = imp.new_module(module_name)
-        exec compiled in mymodule.__dict__
-        return mymodule
+        #set_trace()
+        parts = module_name.split(".")
+        if len(parts) > 1:
+            parent = ".".join(parts[:-1])
+            print "submodule"
+            module = sys.modules[parent]
+            set_trace()
+            print type(module)
+            print module
+            print module.__path__
+            (_file, pathname, description) = find_module(parts[1], module.__path__)
+        else:
+            (_file, pathname, description) = find_module(module_name)
+        if _file:
+            text = _file.read()
+            tree = ast.parse(text)
+            transformer = Transformer()
+            node = transformer.visit(tree)
+            self.modules[module_name] = transformer.items
+            compiled = compile(tree, filename="<ast>", mode="exec")
+            mymodule = imp.new_module(module_name)
+            print "starting compile factoiral"
+            exec compiled in mymodule.__dict__
+            print "done compile factoiral"
+
+            return mymodule
+        else:
+            print "Is a package!"
+            filename = "%s/__init__.py" % pathname
+            with open(filename, "r") as f:
+                text = f.read()
+                tree = ast.parse(text)
+                transformer = Transformer()
+                node = transformer.visit(tree)
+                self.modules[module_name] = transformer.items
+                compiled = compile(tree, filename="<ast>", mode="exec")
+
+                mymodule = imp.new_module(module_name)
+                mymodule = sys.modules.setdefault(module_name, mymodule)
+                mymodule.__path__ = [pathname]
+                mymodule.__file__ = filename
+                mymodule.__loader__ = self
+                #mymodule.__package__ = module_name
+
+                exec compiled in mymodule.__dict__
+                print "imported", module_name
+                return mymodule
 
 
 def run_tests():
@@ -87,22 +127,33 @@ def run_tests():
     runner = TextTestRunner(stream=stream)
     runner = TextTestRunner()
     suites = list(suites)
-    baseline = runner.run(suites[0])
-    return baseline.wasSuccessful()
+    results = []
+    for suite in suites:
+        results.append(runner.run(suite))
 
+    bools = [x.wasSuccessful() for x in results]
+    return all(bools)
 
-def get_modules(queue):
+def _get_modules():
     hook = ImportHook()
     sys.meta_path.append(hook)
     success = run_tests()
-    queue.put((success, hook.modules))
+    return success, hook.modules
 
-q = Queue()
-p = Process(target=get_modules, args=(q,))
-p.start()
-p.join()
-(success, modules) = q.get()
-print success, modules
+def get_modules(queue):
+    (success, hook.modules)
+    queue.put()
+
+#q = Queue()
+#p = Process(target=get_modules, args=(q,))
+#p.start()
+#p.join()
+#(success, modules) = q.get()
+#print success, modules
+
+(success, modules) = _get_modules()
+print modules
+print modules.keys()
 
 def mutate_and_test(q, module, index):
     hook = ModifyImportHook(module, index)
@@ -144,7 +195,7 @@ def test():
 
 
 
-run_fixture()
+#run_fixture()
 #test()
 for result in results:
     print result
