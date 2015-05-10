@@ -35,18 +35,17 @@ class Transformer(ast.NodeTransformer):
         self.items = []
         self.remove_at = remove_at
 
-    def action(self, node):
+    def get_statement(self, node):
         if isinstance(node, ast.stmt):
-            self.items.append((node.lineno, node))
-            #print node.lineno, node
-            return True
-        return False
+            return (node.lineno, node)
 
     def visit(self, node):
-        #print len(self.items), self.remove_at
-        if self.action(node) and len(self.items) == self.remove_at:
-            print "REMOVING", node
-            return ast.Pass()
+        statement = self.get_statement(node)
+        if statement:
+            if len(self.items) == self.remove_at:
+                self.items.append(statement)
+                return ast.Pass()
+            self.items.append(statement)
         return super(ast.NodeTransformer, self).visit(node)
 
 
@@ -68,7 +67,6 @@ class ModifyImportHook(object):
         tree = ast.parse(text)
         transformer = Transformer(remove_at=self.index)
         node = transformer.visit(tree)
-
         ast.fix_missing_locations(tree)
         #print ast_visit(node)
         print "^^^"
@@ -139,7 +137,7 @@ def run_fixture():
         statements = modules[key]
         for i in range(len(statements)):
             (line, statement) = statements[i]
-            print "Removing", statement, "on line", line, "in module", key
+            print "Removing(%s)" % i, statement, "on line", line, "in module", key
             q = Queue()
             p = Process(target=mutate_and_test, args=(q, key, i))
             p.start()
@@ -155,7 +153,7 @@ def run_fixture():
 
 
 def test():
-    hook = ModifyImportHook("factorial", 9)
+    hook = ModifyImportHook("factorial", 0)
     sys.meta_path.append(hook)
     try:
         print "TRY"
