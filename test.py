@@ -10,25 +10,6 @@ import sys
 
 from pdb import set_trace
 
-def str_node(node):
-    if isinstance(node, ast.AST):
-        fields = [(name, str_node(val)) for name, val in ast.iter_fields(node) if name not in ('left', 'right')]
-        rv = '%s(%s' % (node.__class__.__name__, ', '.join('%s=%s' % field for field in fields))
-        return rv + ')'
-    else:
-        return repr(node)
-
-def ast_visit(node, level=0):
-    print('  ' * level + str_node(node))
-    for field, value in ast.iter_fields(node):
-        if isinstance(value, list):
-            for item in value:
-                if isinstance(item, ast.AST):
-                    ast_visit(item, level=level+1)
-        elif isinstance(value, ast.AST):
-            ast_visit(value, level=level+1)
-
-
 class Transformer(ast.NodeTransformer):
 
     def __init__(self, remove_at=None):
@@ -68,8 +49,6 @@ class ModifyImportHook(object):
         transformer = Transformer(remove_at=self.index)
         node = transformer.visit(tree)
         ast.fix_missing_locations(tree)
-        #print ast_visit(node)
-        print "^^^"
         compiled = compile(tree, filename="<ast>", mode="exec")
         mymodule = imp.new_module(module_name)
         exec compiled in mymodule.__dict__
@@ -83,6 +62,8 @@ class ImportHook(object):
     def find_module(self, module_name, package_path):
         if module_name.startswith("factorial"):
             return self
+#        if module_name.startswith("sample"):
+#            return self
         return None
 
     def load_module(self, module_name):
@@ -92,7 +73,6 @@ class ImportHook(object):
         tree = ast.parse(text)
         transformer = Transformer()
         node = transformer.visit(tree)
-        print ast_visit(tree)
         self.modules[module_name] = transformer.items
         compiled = compile(tree, filename="<ast>", mode="exec")
         mymodule = imp.new_module(module_name)
