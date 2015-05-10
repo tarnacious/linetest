@@ -69,21 +69,25 @@ class ImportHook(object):
             return self
         return None
 
-    def load_module(self, module_name):
-        print "Load module:", module_name
-        #set_trace()
+    def _get_module(self, module_name):
         parts = module_name.split(".")
         if len(parts) > 1:
             parent = ".".join(parts[:-1])
-            print "submodule"
-            module = sys.modules[parent]
-            set_trace()
-            print type(module)
-            print module
-            print module.__path__
-            (_file, pathname, description) = find_module(parts[1], module.__path__)
+            return sys.modules[parent]
+
+    def _get_name(self, module_name):
+        return module_name.split(".")[::-1][0]
+
+    def load_module(self, module_name):
+        print "Load module:", module_name
+        name = self._get_name(module_name)
+        module = self._get_module(module_name)
+        if module:
+            found = find_module(name, module.__path__)
         else:
-            (_file, pathname, description) = find_module(module_name)
+            found = find_module(module_name)
+
+        (_file, pathname, description) = found
         if _file:
             text = _file.read()
             tree = ast.parse(text)
@@ -141,19 +145,8 @@ def _get_modules():
     return success, hook.modules
 
 def get_modules(queue):
-    (success, hook.modules)
-    queue.put()
+    queue.put(_get_modules())
 
-#q = Queue()
-#p = Process(target=get_modules, args=(q,))
-#p.start()
-#p.join()
-#(success, modules) = q.get()
-#print success, modules
-
-(success, modules) = _get_modules()
-print modules
-print modules.keys()
 
 def mutate_and_test(q, module, index):
     hook = ModifyImportHook(module, index)
@@ -163,7 +156,7 @@ def mutate_and_test(q, module, index):
 
 results = []
 
-def run_fixture():
+def run_fixture(modules):
     for key in modules.keys():
         statements = modules[key]
         for i in range(len(statements)):
@@ -194,8 +187,21 @@ def test():
         print "ERROR"
 
 
+def fork_get_modules():
+    q = Queue()
+    p = Process(target=get_modules, args=(q,))
+    p.start()
+    p.join()
+    return q.get()
 
-#run_fixture()
+
+#(success, modules) =  fork_get_modules()
+(success, modules) = _get_modules()
+
+print modules
+print modules.keys()
+
+#run_fixture(modules)
 #test()
 for result in results:
     print result
