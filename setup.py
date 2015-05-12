@@ -7,6 +7,7 @@ setup(
     author_email="tarn@tarnbarford.net",
     description="a sample python project with unit tests",
     license="BSD",
+    packages=["linetest"],
     keywords="",
     url="",
     long_description="",
