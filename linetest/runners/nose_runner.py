@@ -7,7 +7,7 @@ import os
 def run_tests():
     working_dir = os.path.join(os.getcwd())
     stream = StringIO()
-    suites = TestLoader(workingDir=working_dir).loadTestsFromDir("./test")
+    suites = TestLoader(workingDir=working_dir).loadTestsFromDir("./sample/test_sample")
     runner = TextTestRunner(stream=stream)
     runner = TextTestRunner()
     suites = list(suites)

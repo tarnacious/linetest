@@ -1,7 +1,8 @@
 import sys
 from mutation.collect_hook import CollectStatements
 from mutation.modify_hook import ModifyModule
-from runners.nose_runner import run_tests
+#from runners.nose_runner import run_tests
+from runners.pytest_runner import run_tests
 from isolation.run_process import run_process
 
 
@@ -41,8 +42,8 @@ def test():
         print "ERROR"
 
 
-(success, modules) = run_process(lambda: get_modules())
-#(success, modules) = get_modules()
+#(success, modules) = run_process(lambda: get_modules())
+(success, modules) = get_modules()
 
 print modules
 print modules.keys()
