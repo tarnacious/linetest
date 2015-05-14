@@ -12,7 +12,10 @@ class CollectStatements(object):
         # Hack to not load sytem libraries as we get lookups for
         # sample.json.re when really we are tring to import re from inside
         # json, from inside sample :(
-        if package_path and len(package_path) > 0 and package_path[0].find("python2.7") > 0:
+        if (package_path and len(package_path) > 0 and
+           (package_path[0].find("python2.7") > 0 or
+            package_path[0].find("site-packages") > 0
+            )):
             return None
 
         if module_name.startswith("factorial"):
