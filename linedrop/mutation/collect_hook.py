@@ -1,5 +1,5 @@
-from mutation.transformer import Transformer
-from mutation.load_module import load_module
+from linedrop.mutation.transformer import Transformer
+from linedrop.mutation.load_module import load_module
 
 
 class CollectStatements(object):

@@ -1,9 +1,9 @@
 import sys
-from mutation.collect_hook import CollectStatements
-from mutation.modify_hook import ModifyModule
+from linedrop.mutation.collect_hook import CollectStatements
+from linedrop.mutation.modify_hook import ModifyModule
 #from runners.nose_runner import run_tests
-from runners.pytest_runner import run_tests
-from isolation.run_process import run_process
+from linedrop.runners.pytest_runner import run_tests
+from linedrop.isolation.run_process import run_process
 from itertools import groupby
 
 
@@ -32,14 +32,6 @@ def run_fixture(modules):
     return results
 
 
-(success, modules) = run_process(lambda: get_modules())
-#(success, modules) = get_modules()
-
-print "success?", success
-print modules
-print modules.keys()
-
-results = run_fixture(modules)
 
 def process_results(results):
     files = {}
@@ -48,7 +40,17 @@ def process_results(results):
     print " "
     print files
 
-for result in results:
-    print result
+def main():
+    (success, modules) = run_process(lambda: get_modules())
+    #(success, modules) = get_modules()
+    print "success?", success
+    print modules
+    print modules.keys()
+    results = run_fixture(modules)
+    for result in results:
+        print result
 
-process_results(results)
+    process_results(results)
+
+if __name__ == "__main__":
+    main()

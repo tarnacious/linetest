@@ -12,6 +12,11 @@ setup(
     install_requires=["nose", "pytest"],
     url="",
     long_description="",
+    entry_points={
+        'console_scripts': [
+            "linedrop=linedrop.main:main"
+        ]
+    },
     classifiers=[
         "License :: OSI Approved :: BSD License",
     ]
