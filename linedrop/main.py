@@ -53,7 +53,10 @@ def main():
 
     process_results(results)
 
-if __name__ == "__main__":
+def collect():
     path = os.getcwd() + "/sample"
     (success, modules) = get_modules(path)
     print modules.keys()
+
+if __name__ == "__main__":
+    collect()

@@ -14,7 +14,8 @@ setup(
     long_description="",
     entry_points={
         'console_scripts': [
-            "linedrop=linedrop.main:main"
+            "linedrop=linedrop.main:main",
+            "collect=linedrop.main:collect"
         ]
     },
     classifiers=[
