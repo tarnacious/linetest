@@ -7,8 +7,14 @@ class CollectStatements(object):
         self.modules = {}
 
     def find_module(self, module_name, package_path):
-        #return self
-        # TODO: object level regex
+        print "Find_module", module_name, package_path
+
+        # Hack to not load sytem libraries as we get lookups for
+        # sample.json.re when really we are tring to import re from inside
+        # json, from inside sample :(
+        if package_path and len(package_path) > 0 and package_path[0].find("python2.7") > 0:
+            return None
+
         if module_name.startswith("factorial"):
             return self
         if module_name.startswith("sample"):

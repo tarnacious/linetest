@@ -1,3 +1,4 @@
+import json
 print "factorial loaded"
 
 import sample.another

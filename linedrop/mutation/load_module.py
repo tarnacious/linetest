@@ -34,6 +34,7 @@ def _get_code_string(_file, path):
 
 
 def load_module(module_name, ast_fn):
+    print "Loading module:", module_name
     # Immediatly create a new module and update sys.modules in case this module
     # is imported within the module
     mymodule = imp.new_module(module_name)
