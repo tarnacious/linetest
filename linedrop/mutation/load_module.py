@@ -4,10 +4,10 @@ import imp
 from imp import find_module
 
 
-def get_package(module_name):
+def get_package(module_name, depth=1):
     parts = module_name.split(".")
-    if len(parts) > 1:
-        parent = ".".join(parts[:-1])
+    if len(parts) > depth:
+        parent = ".".join(parts[:-depth])
         return sys.modules[parent]
 
 
@@ -42,7 +42,23 @@ def load_module(module_name, ast_fn):
     name = _get_name(module_name)
     package = get_package(module_name)
     if package:
-        found = find_module(name, package.__path__)
+        try:
+            found = find_module(name, package.__path__)
+        except ImportError:
+            # It appears that we are expeted to load either:
+            #
+            #   sample.sample.factorial
+            # or
+            #   sample.factorial
+            #
+            # Both expect us to load the same module. For now basically catch
+            # InportError in find_module, then try again stripping off the
+            # first module. I'm not sure yet how this is supposed to be done.
+            package = get_package(module_name, depth=2)
+            if package:
+                found = find_module(name, package.__path__)
+            else:
+                found = find_module(name)
     else:
         found = find_module(module_name)
 
