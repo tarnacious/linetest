@@ -1,14 +1,15 @@
 from setuptools import setup
 
 setup(
-    name="Test Coverage",
+    name="linedrop",
     version="0.0.1",
     author="Tarn Barford",
     author_email="tarn@tarnbarford.net",
-    description="a sample python project with unit tests",
+    description="Test coverage by removing statements and ensuring tests pass",
     license="BSD",
-    packages=["linetest"],
+    packages=["linedrop", "sample"],
     keywords="",
+    install_requires=["nose", "pytest"],
     url="",
     long_description="",
     classifiers=[

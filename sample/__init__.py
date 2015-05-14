@@ -1,1 +1,0 @@
-print "!! LOADED SAMPLE MODULE !!"

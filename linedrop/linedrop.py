@@ -4,6 +4,7 @@ from mutation.modify_hook import ModifyModule
 #from runners.nose_runner import run_tests
 from runners.pytest_runner import run_tests
 from isolation.run_process import run_process
+from itertools import groupby
 
 
 def get_modules():
@@ -39,5 +40,15 @@ print modules
 print modules.keys()
 
 results = run_fixture(modules)
+
+def process_results(results):
+    files = {}
+    for key, group in groupby(results, lambda x: x[0]):
+        files[key] = group
+    print " "
+    print files
+
 for result in results:
     print result
+
+process_results(results)
