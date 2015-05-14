@@ -42,7 +42,6 @@ def process_results(results):
 
 def main():
     (success, modules) = run_process(lambda: get_modules())
-    #(success, modules) = get_modules()
     print "success?", success
     print modules
     print modules.keys()
@@ -53,4 +52,4 @@ def main():
     process_results(results)
 
 if __name__ == "__main__":
-    main()
+    (success, modules) = get_modules()
