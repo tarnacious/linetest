@@ -1,8 +1,8 @@
-print "factorial loaded", "cat dog"
-print "load2"
-import sample.another
+print "factorial loaded"
 
+import sample.another
 sample.another.prn("KATZE")
+
 
 def factorial(n):
 
