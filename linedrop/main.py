@@ -5,10 +5,11 @@ from linedrop.mutation.modify_hook import ModifyModule
 from linedrop.runners.pytest_runner import run_tests
 from linedrop.isolation.run_process import run_process
 from itertools import groupby
+import os
 
 
-def get_modules():
-    hook = CollectStatements()
+def get_modules(path):
+    hook = CollectStatements(path)
     sys.meta_path.append(hook)
     success = run_tests()
     return success, hook.modules
@@ -41,7 +42,8 @@ def process_results(results):
     print files
 
 def main():
-    (success, modules) = run_process(lambda: get_modules())
+    path = os.getcwd() + "/sample"
+    (success, modules) = run_process(lambda: get_modules(path))
     print "success?", success
     print modules
     print modules.keys()
@@ -52,4 +54,6 @@ def main():
     process_results(results)
 
 if __name__ == "__main__":
-    (success, modules) = get_modules()
+    path = os.getcwd() + "/sample"
+    (success, modules) = get_modules(path)
+    print modules.keys()

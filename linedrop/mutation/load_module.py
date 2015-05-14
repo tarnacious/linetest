@@ -2,6 +2,7 @@ import sys
 import ast
 import imp
 from imp import find_module
+import os.path
 
 
 def get_package(module_name, depth=1):
@@ -29,17 +30,13 @@ def _get_code_string(_file, path):
     if _file:
         return _file.read()
     filename = _get_filename(_file, path)
-    with open(filename, "r") as f:
-        return f.read()
+    if os.path.isfile(filename):
+        with open(filename, "r") as f:
+            return f.read()
+    return None
 
 
-def load_module(module_name, ast_fn):
-    print "Loading module:", module_name
-    # Immediatly create a new module and update sys.modules in case this module
-    # is imported within the module
-    mymodule = imp.new_module(module_name)
-    sys.modules.setdefault(module_name, mymodule)
-
+def _find_module(module_name):
     name = _get_name(module_name)
     package = get_package(module_name)
     if package:
@@ -62,6 +59,17 @@ def load_module(module_name, ast_fn):
                 found = find_module(name)
     else:
         found = find_module(module_name)
+    return found
+
+def load_module(module_name, ast_fn):
+    print "Loading module:", module_name
+    # Immediatly create a new module and update sys.modules in case this module
+    # is imported within the module
+    mymodule = imp.new_module(module_name)
+    sys.modules.setdefault(module_name, mymodule)
+
+    found = _find_module(module_name)
+
 
     (_file, pathname, description) = found
     text = _get_code_string(_file, pathname)

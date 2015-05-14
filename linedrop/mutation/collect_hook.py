@@ -1,26 +1,16 @@
 from linedrop.mutation.transformer import Transformer
-from linedrop.mutation.load_module import load_module
+from linedrop.mutation.load_module import load_module, _find_module, _get_code_string
 
 
 class CollectStatements(object):
-    def __init__(self):
+    def __init__(self, path):
         self.modules = {}
+        self.path = path
 
     def find_module(self, module_name, package_path):
-        print "Find_module", module_name, package_path
-
-        # Hack to not load sytem libraries as we get lookups for
-        # sample.json.re when really we are tring to import re from inside
-        # json, from inside sample :(
-        if (package_path and len(package_path) > 0 and
-           (package_path[0].find("python2.7") > 0 or
-            package_path[0].find("site-packages") > 0
-            )):
-            return None
-
-        if module_name.startswith("factorial"):
-            return self
-        if module_name.startswith("sample"):
+        module = _find_module(module_name)
+        (_file, pathname, description) = module
+        if pathname.startswith(self.path):
             return self
 
     def collect_statements(self, module_name, ast):
