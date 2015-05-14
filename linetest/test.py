@@ -31,20 +31,10 @@ def run_fixture(modules):
     return results
 
 
-def test():
-    hook = ModifyModule("factorial", 0)
-    sys.meta_path.append(hook)
-    try:
-        print "TRY"
-        result = run_tests()
-        print "CATCH", result
-    except:
-        print "ERROR"
+(success, modules) = run_process(lambda: get_modules())
+#(success, modules) = get_modules()
 
-
-#(success, modules) = run_process(lambda: get_modules())
-(success, modules) = get_modules()
-
+print "success?", success
 print modules
 print modules.keys()
 
