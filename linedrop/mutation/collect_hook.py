@@ -11,7 +11,11 @@ class CollectStatements(object):
         module = _find_module(module_name)
         (_file, pathname, description) = module
         if pathname.startswith(self.path):
+            print "HANDLE", module_name, pathname
             return self
+        else:
+            print "KICK", module_name, pathname
+            return None
 
     def collect_statements(self, module_name, ast):
         transformer = Transformer()

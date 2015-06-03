@@ -9,7 +9,7 @@ setup(
     license="BSD",
     packages=["linedrop", "sample"],
     keywords="",
-    install_requires=["nose", "pytest"],
+    install_requires=["nose", "pytest", "six"],
     url="",
     long_description="",
     entry_points={
