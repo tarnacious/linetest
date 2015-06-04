@@ -42,8 +42,13 @@ def process_results(results):
     print files
 
 def main():
-    path = os.getcwd() + "/sample"
+    path = os.getcwd() + "/tmsbase"
+    print path
     (success, modules) = run_process(lambda: get_modules(path))
+    #(success, modules) = get_modules(path)
+    from pdb import set_trace
+    #set_trace()
+
     print "success?", success
     print modules
     print modules.keys()
@@ -54,7 +59,8 @@ def main():
     process_results(results)
 
 def collect():
-    path = os.getcwd() + "/sample"
+    path = os.getcwd() + "/tmsbase"
+    print path
     (success, modules) = get_modules(path)
     print modules.keys()
 
