@@ -9,12 +9,12 @@ class CollectStatements(object):
 
     def find_module(self, module_name, package_path):
         module = _find_module(module_name)
+        if module is None:
+            return None
         (_file, pathname, description) = module
         if pathname.startswith(self.path):
-            print "HANDLE", module_name, pathname
             return self
         else:
-            print "KICK", module_name, pathname
             return None
 
     def collect_statements(self, module_name, ast):
