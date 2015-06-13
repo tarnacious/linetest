@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="linedrop",
@@ -7,7 +7,7 @@ setup(
     author_email="tarn@tarnbarford.net",
     description="Test coverage by removing statements and ensuring tests pass",
     license="BSD",
-    packages=["linedrop", "sample"],
+    packages=find_packages(include=["linedrop", "sample"]),
     keywords="",
     install_requires=["nose", "pytest", "six"],
     url="",
