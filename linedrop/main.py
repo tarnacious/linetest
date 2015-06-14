@@ -73,7 +73,7 @@ def collect():
         for (line, operation) in v:
             print k, line, operation
 
-    total = sum([len(v) for v in modules.values])
+    total = sum([len(v) for v in modules.values()])
 
     print ""
     print "Using module pattern:", pattern
