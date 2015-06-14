@@ -48,6 +48,7 @@ def main():
         return
     pattern = sys.argv[1]
     sys.argv = sys.argv[:1] + sys.argv[2:]
+    print "Using module pattern:", pattern
     print sys.argv
     (success, modules) = run_process(lambda: get_modules(pattern))
     #(success, modules) = get_modules(pattern)
@@ -65,6 +66,7 @@ def collect():
         print "Syntax is `linedrop pattern args`"
         return
     pattern = sys.argv[1]
+    print "Using module pattern:", pattern
     sys.argv = sys.argv[:1] + sys.argv[2:]
     print sys.argv
     (success, modules) = get_modules(pattern)
