@@ -10,9 +10,7 @@ class CollectStatements(object):
         self.p = re.compile(pattern)
 
     def find_module(self, module_name, package_path):
-        if self.p.match(module_name):
-            return self
-        else:
+        if not self.p.match(module_name):
             return None
 
         # Do we need this shit?
