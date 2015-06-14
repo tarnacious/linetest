@@ -66,13 +66,20 @@ def collect():
         print "Syntax is `linedrop pattern args`"
         return
     pattern = sys.argv[1]
-    print "Using module pattern:", pattern
     sys.argv = sys.argv[:1] + sys.argv[2:]
     print sys.argv
     (success, modules) = get_modules(pattern)
     for k, v in modules.iteritems():
         for (line, operation) in v:
             print k, line, operation
+
+    total = sum([len(v) for v in modules.values])
+
+    print ""
+    print "Using module pattern:", pattern
+    print "Tests were successful:", success
+    print "Total statements to test:", total
+    print ""
 
 if __name__ == "__main__":
     collect()
