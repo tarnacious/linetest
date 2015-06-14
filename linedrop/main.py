@@ -27,7 +27,7 @@ def run_fixture(modules):
         statements = modules[key]
         for i in range(len(statements)):
             (line, statement) = statements[i]
-            success = run_process(lambda: mutate_and_test(key, i))
+            (success, out, err) = run_process(lambda: mutate_and_test(key, i))
             results.append((key, line, success, statement))
             print success
     return results
@@ -50,7 +50,7 @@ def main():
     sys.argv = sys.argv[:1] + sys.argv[2:]
     print "Using module pattern:", pattern
     print sys.argv
-    (success, modules) = run_process(lambda: get_modules(pattern))
+    ((success, modules), out, err) = run_process(lambda: get_modules(pattern))
     #(success, modules) = get_modules(pattern)
     print "success?", success
     print modules
