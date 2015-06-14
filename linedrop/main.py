@@ -27,8 +27,8 @@ def run_fixture(modules):
     for key in modules.keys():
         statements = modules[key]
         for i in range(len(statements)):
-            print "Trying line", line, statement
             (line, statement) = statements[i]
+            print "Trying line", line, statement
             (success, out, err) = run_process(lambda: mutate_and_test(key, i))
             results.append((key, line, success, statement))
             print "Complete line", line, "of", total, success
