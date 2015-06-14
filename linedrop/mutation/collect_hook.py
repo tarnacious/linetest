@@ -1,13 +1,21 @@
 from linedrop.mutation.transformer import Transformer
 from linedrop.mutation.load_module import load_module, _find_module, _get_code_string
+import re
 
 
 class CollectStatements(object):
-    def __init__(self, path):
+    def __init__(self, pattern):
         self.modules = {}
-        self.path = path
+        self.pattern = pattern
+        self.p = re.compile(pattern)
 
     def find_module(self, module_name, package_path):
+        if self.p.match(module_name):
+            return self
+        else:
+            return None
+
+        # Do we need this shit?
         module = _find_module(module_name)
         if module is None:
             return None

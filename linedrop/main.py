@@ -41,14 +41,16 @@ def process_results(results):
     print " "
     print files
 
-def main():
-    path = os.getcwd() + "/tmsbase"
-    print path
-    (success, modules) = run_process(lambda: get_modules(path))
-    #(success, modules) = get_modules(path)
-    from pdb import set_trace
-    #set_trace()
 
+def main():
+    if len(sys.argv) == 1:
+        print "Syntax is `linedrop pattern args`"
+        return
+    pattern = sys.argv[1]
+    sys.argv = sys.argv[:1] + sys.argv[2:]
+    print sys.argv
+    (success, modules) = run_process(lambda: get_modules(pattern))
+    #(success, modules) = get_modules(pattern)
     print "success?", success
     print modules
     print modules.keys()
@@ -59,9 +61,13 @@ def main():
     process_results(results)
 
 def collect():
-    path = os.getcwd() + "/tmsbase"
-    print path
-    (success, modules) = get_modules(path)
+    if len(sys.argv) == 1:
+        print "Syntax is `linedrop pattern args`"
+        return
+    pattern = sys.argv[1]
+    sys.argv = sys.argv[:1] + sys.argv[2:]
+    print sys.argv
+    (success, modules) = get_modules(pattern)
     print modules.keys()
 
 if __name__ == "__main__":
