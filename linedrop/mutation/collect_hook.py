@@ -13,10 +13,11 @@ class CollectStatements(object):
         if not self.p.match(module_name):
             return None
 
-        # Do we need this shit?
         module = _find_module(module_name)
         if module is None:
             return None
+        return self
+        # Do we need this shit?
         (_file, pathname, description) = module
         if pathname.startswith(self.path):
             return self
