@@ -70,7 +70,8 @@ def collect():
     sys.argv = sys.argv[:1] + sys.argv[2:]
     print sys.argv
     (success, modules) = get_modules(pattern)
-    print modules.keys()
+    for k, v in modules.iteritems():
+        print k, v
 
 if __name__ == "__main__":
     collect()
