@@ -71,7 +71,8 @@ def collect():
     print sys.argv
     (success, modules) = get_modules(pattern)
     for k, v in modules.iteritems():
-        print k, v
+        for (line, operation) in v:
+            print k, line, operation
 
 if __name__ == "__main__":
     collect()
