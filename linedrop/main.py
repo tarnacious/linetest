@@ -23,14 +23,15 @@ def mutate_and_test(module, index):
 
 def run_fixture(modules):
     results = []
+    total = sum([len(v) for v in modules.values()])
     for key in modules.keys():
         statements = modules[key]
         for i in range(len(statements)):
+            print "Trying line", line, statement
             (line, statement) = statements[i]
             (success, out, err) = run_process(lambda: mutate_and_test(key, i))
             results.append((key, line, success, statement))
-            print i, success
-            print success
+            print "Complete line", line, "of", total, success
     return results
 
 
