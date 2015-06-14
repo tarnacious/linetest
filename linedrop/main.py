@@ -29,6 +29,7 @@ def run_fixture(modules):
             (line, statement) = statements[i]
             (success, out, err) = run_process(lambda: mutate_and_test(key, i))
             results.append((key, line, success, statement))
+            print i, success
             print success
     return results
 

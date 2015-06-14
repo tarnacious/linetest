@@ -18,7 +18,7 @@ def run_process(fn):
 
     p = Process(target=run)
     p.start()
-    p.join(timeout=60)
+    p.join(timeout=6)
     if not q.empty():
         return q.get()
     else:
