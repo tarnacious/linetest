@@ -12,7 +12,6 @@ def get_modules(path):
     hook = CollectStatements(path)
     sys.meta_path.append(hook)
     success = run_tests()
-    print "Got modules"
     return success, hook.modules
 
 

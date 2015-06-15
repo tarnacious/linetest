@@ -7,14 +7,15 @@ def run_process(fn):
     q = Queue()
 
     def run():
-        sys.stdout = open(str(os.getpid()) + ".out", "a", buffering=0)
-        sys.stderr = open(str(os.getpid()) + "_error.out", "a", buffering=0)
+        #sys.stdout = open(str(os.getpid()) + ".out", "a", buffering=0)
+        #sys.stderr = open(str(os.getpid()) + "_error.out", "a", buffering=0)
         res = fn()
-        stdout = open(str(os.getpid()) + ".out", "r").read()
-        stderr = open(str(os.getpid()) + "_error.out", "r", buffering=0)
+        #stdout = open(str(os.getpid()) + ".out", "r").read()
+        #stderr = open(str(os.getpid()) + "_error.out", "r", buffering=0)
         q.put((res, stdout, stderr))
-        os.remove(str(os.getpid()) + ".out")
-        os.remove(str(os.getpid()) + "_error.out")
+        #os.remove(str(os.getpid()) + ".out")
+        #os.remove(str(os.getpid()) + "_error.out")
+        print "RUN COMPLETE"
 
     p = Process(target=run)
     p.start()
