@@ -9,7 +9,7 @@ class Transformer(NodeTransformer):
 
     def get_statement(self, node):
         if isinstance(node, stmt):
-            return (node.lineno, node)
+            return (node.lineno, str(node))
 
     def visit(self, node):
         statement = self.get_statement(node)
