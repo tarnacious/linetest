@@ -5,9 +5,11 @@ import linedrop.main
 
 class RunFunction(object):
 
-    def __init__(self, module, index):
+    def __init__(self, module, index, line, statement):
         self.module = module
         self.index = index
+        self.line = line
+        self.statement = statement
 
     def __call__(self):
         logger = Logger()
@@ -15,7 +17,8 @@ class RunFunction(object):
         sys.stderr = logger
         result = self.run()
         return (self.module,
-                self.index,
+                self.line,
+                self.statement,
                 result,
                 logger.log)
 

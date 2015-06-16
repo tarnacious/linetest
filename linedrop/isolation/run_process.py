@@ -12,7 +12,7 @@ def run(fn, q):
     q.put((res, logger.log, ""))
 
 
-def run_processes(funs, cb):
+def run_processes(funs, cb, run_function):
     results = []
     pool = Pool(processes=4, maxtasksperchild=1)
 
@@ -20,8 +20,9 @@ def run_processes(funs, cb):
         results.append(result)
         cb(result)
 
-    for (line, index) in funs:
-        pool.apply_async(RunFunction(line, index), callback=callback)
+    for mutation in funs:
+        pool.apply_async(run_function(*mutation), callback=callback)
+
     pool.close()
     pool.join()
     return results

@@ -1,11 +1,21 @@
 import sys
+import re
+import json
 from linedrop.mutation.collect_hook import CollectStatements
 from linedrop.mutation.modify_hook import ModifyModule
 #from runners.nose_runner import run_tests
 from linedrop.runners.pytest_runner import run_tests
 from linedrop.isolation.run_process import run_process, run_processes
+from linedrop.isolation.run_function import RunFunction
 from itertools import groupby
-import os
+
+
+class PyTestRunFunction(RunFunction):
+
+    def run(self):
+        hook = ModifyModule(self.module, self.index)
+        sys.meta_path.append(hook)
+        return run_tests()
 
 
 def get_modules(path):
@@ -24,45 +34,39 @@ def mutate_and_test(module, index):
 def run_fixture(modules):
     results = []
 
-    funs = []
+    mutations = []
     for key in modules.keys():
         statements = modules[key]
-        for i in range(len(statements))[:1]:
-            (line, statement) = statements[i]
-            funs.append((key, i))
+        for index in range(len(statements)):
+            (line, statement) = statements[index]
+            mutations.append((key, index, line, statement))
 
     def update(result):
-        statement = "no statement"
-        (key, line, success, log) = result
-        results.append((key, line, success, statement))
+        (key, line, statement, success, log) = result
+        results.append(result)
         print "Completed", len(results), "of", total, success
 
-    total = len(funs)
-
-    run_processes(funs, update)
-
-    #for test in tests:
-    #    (success, out, err) = run_process(test)
-    #    print out
-    #print tests
-    #for key in modules.keys():
-    #    statements = modules[key]
-    #    for i in range(len(statements)):
-    #        (line, statement) = statements[i]
-    #        print "Trying line", line, statement
-    #        (success, out, err) = run_process(lambda: mutate_and_test(key, i))
-    #        results.append((key, line, success, statement))
-    #        print "Complete line", line, "of", total, success
+    total = len(mutations)
+    run_processes(mutations, update, PyTestRunFunction)
     return results
 
 
-
-def process_results(results):
+def dump_json(results):
     files = {}
     for key, group in groupby(results, lambda x: x[0]):
         files[key] = list(group)
-    print " "
-    print files
+    filename = "linedrop_results.json"
+    print "Writing results to", filename
+    with open(filename, "w") as f:
+        f.write(json.dumps(files))
+
+
+def dump_result(results):
+    filename = "linedrop_results.txt"
+    print "Writing formated results to", filename
+    with open(filename, "w") as f:
+        for result in results:
+            f.write(format_result(*result) + "\n")
 
 
 def main():
@@ -89,12 +93,27 @@ def main():
 
     print "Discovery complete, tests pass."
 
-
     results = run_fixture(modules)
     for result in results:
-        print result
+        print format_result(*result)
+    print ""
+    dump_result(results)
+    dump_json(results)
+    print "\nDone."
 
-    process_results(results)
+
+def format_result(module, line, statement, success, log):
+    parts = [pad_module(module), str(line), str(success), strip_statement(statement)]
+    return "\t".join(parts)
+
+
+def pad_module(module):
+    return module + " " * (40 - len(module))
+
+
+def strip_statement(statement):
+    return re.match("._ast.([^ ]*) .*", statement).groups()[0]
+
 
 def collect():
     if len(sys.argv) == 1:
