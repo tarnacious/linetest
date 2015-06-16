@@ -1,23 +1,36 @@
-from multiprocessing import Process, Queue
-import os
 import sys
+from multiprocessing import Process, Queue, Pool
+from linedrop.isolation.logger import Logger
+from linedrop.isolation.run_function import RunFunction
+
+
+def run(fn, q):
+    logger = Logger()
+    sys.stdout = logger
+    sys.stderr = logger
+    res = fn()
+    q.put((res, logger.log, ""))
+
+
+def run_processes(funs, cb):
+    results = []
+    pool = Pool(processes=4, maxtasksperchild=1)
+
+    def callback(result):
+        results.append(result)
+        cb(result)
+
+    for (line, index) in funs:
+        pool.apply_async(RunFunction(line, index), callback=callback)
+    pool.close()
+    pool.join()
+    return results
 
 
 def run_process(fn):
     q = Queue()
 
-    def run():
-        #sys.stdout = open(str(os.getpid()) + ".out", "a", buffering=0)
-        #sys.stderr = open(str(os.getpid()) + "_error.out", "a", buffering=0)
-        res = fn()
-        #stdout = open(str(os.getpid()) + ".out", "r").read()
-        #stderr = open(str(os.getpid()) + "_error.out", "r", buffering=0)
-        q.put((res, stdout, stderr))
-        #os.remove(str(os.getpid()) + ".out")
-        #os.remove(str(os.getpid()) + "_error.out")
-        print "RUN COMPLETE"
-
-    p = Process(target=run)
+    p = Process(target=run, args=(fn, q,))
     p.start()
     p.join(timeout=6)
     if not q.empty():
