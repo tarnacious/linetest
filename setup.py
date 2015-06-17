@@ -12,7 +12,7 @@ setup(
                                     "tests.*",
                                     "tests"]),
     keywords="",
-    install_requires=["nose", "pytest", "six"],
+    install_requires=["nose", "pytest", "coverage==3.7.1", "pytest-cov"],
     url="",
     long_description="",
     entry_points={
