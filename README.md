@@ -116,15 +116,53 @@ this, each time removing a statement.
 There are few key parts that need to work. 
 
 * Running the tests and getting the test result
-* Observing and modifing the loaded source code
+* Observing and modifying the loaded source code
 * Isolating the source code modifications and the tests
 
 The tests are run by requiring the runners (pytest and nose) as dependencies
-and then and then running them in the process.  
+and then and then running them in-process. For pytest, calling the main entry
+point works pretty well as it takes all it's configuration from `sys.argv`
+which is pretty much exactly what we want. For nose, a bit more work is
+required and currently only a proof of concept nose runner is included. 
+
+Observing and modifying the source are implemented using a combination of the
+`sys.metapath` import hook that was introduced in [PEP 302][pep302], the
+[`ast`][ast] module to inspect, modify and load abstract syntax trees from
+python source and the [`imp`][imp] module that exposes some of the import
+mechanics.
+
+TODO: ISOLATION
+
+# Does it work
+
+The was initially built to test some in-house software at [Retresco][retresco]
+and for this software it worked.
+
+I am currently testing it out of two opensource projects I selected due to very
+high test coverage. These are [premailer][premailer] which is quite small and
+[pyramid][pyramid] which is a quite a lot bigger in terms of number of lines
+and tests.
+
+# Things to do
+
+Some things that I would like to get done in no particular order:
+
+* Log everything to a log file
+* Get the nose test runner working
+* Customizable concurrency 
+* Test on more projects
+* Unittests for linedrop itself
+* Running linedrop on itself
+* Better output
+* Coverage compatable reports
+* Docstring tests
+* Code clean-up (it's still a bit of mess)
 
 
-
-[pytest][http://pytest.org/latest/]
-[coverage][https://pypi.python.org/pypi/coverage]
-[ast][https://docs.python.org/2/library/ast.html]
-[pep302][https://www.python.org/dev/peps/pep-0302/]
+[pytest]: http://pytest.org/latest/
+[coverage]: https://pypi.python.org/pypi/coverage
+[ast]: https://docs.python.org/2/library/ast.html
+[pep302]: https://www.python.org/dev/peps/pep-0302/
+[imp]: https://docs.python.org/2/library/imp.html
+[pyramid]: https://github.com/Pylons/pyramid
+[premailer]: https://github.com/premailer/premailer

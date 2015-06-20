@@ -1,7 +1,6 @@
 import sys
 import ast
-import imp
-from imp import find_module
+from imp import find_module, new_module
 import os.path
 
 
@@ -67,7 +66,7 @@ def load_module(module_name, ast_fn):
     print "Loading module:", module_name
     # Immediatly create a new module and update sys.modules in case this module
     # is imported within the module
-    mymodule = imp.new_module(module_name)
+    mymodule = new_module(module_name)
     sys.modules.setdefault(module_name, mymodule)
 
     found = _find_module(module_name)
