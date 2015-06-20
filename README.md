@@ -131,7 +131,12 @@ Observing and modifying the source are implemented using a combination of the
 python source and the [`imp`][imp] module that exposes some of the import
 mechanics.
 
-TODO: ISOLATION
+Due to the way the code is modified (via an import hook) and the way imports
+work in Python (they are only imported once) and we want modify an import more
+than once some form of isolation or module unloading is required. This is
+achieved by forking the process before the tests are run and modifying the
+imports in each for each mutation in a separate process. This also makes it
+possible to run mutation and test suite runs in parallel.
 
 # Does it work
 
@@ -141,12 +146,13 @@ and for this software it worked.
 I am currently testing it out of two opensource projects I selected due to very
 high test coverage. These are [premailer][premailer] which is quite small and
 [pyramid][pyramid] which is a quite a lot bigger in terms of number of lines
-and tests.
+and tests. Currently the premailer tests seem to work and return pretty good results
 
 # Things to do
 
 Some things that I would like to get done in no particular order:
 
+* Python 3 support! (I started with 2.7 as I needed to test a 2.7 project)
 * Log everything to a log file
 * Get the nose test runner working
 * Customizable concurrency 
@@ -157,6 +163,7 @@ Some things that I would like to get done in no particular order:
 * Coverage compatable reports
 * Docstring tests
 * Code clean-up (it's still a bit of mess)
+* Remove six dependency and manual test, unittest multiple metapath functions.
 
 
 [pytest]: http://pytest.org/latest/
@@ -166,3 +173,4 @@ Some things that I would like to get done in no particular order:
 [imp]: https://docs.python.org/2/library/imp.html
 [pyramid]: https://github.com/Pylons/pyramid
 [premailer]: https://github.com/premailer/premailer
+[retresco]: http://www.retresco.de/
