@@ -1,5 +1,5 @@
-#from sample.subsample.add import add
-import sample.subsample.add
+from sample.subsample.add import add
+
 
 def test_add():
-    assert sample.subsample.add.add(2, 2) == 4
+    assert add(2, 2) == 4

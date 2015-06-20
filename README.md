@@ -22,11 +22,73 @@ the modules to be mutated.
 
     linedrop ^my_module.*$ path/to/my/tests/
 
-It might take some time.
 
 # Example
 
-    ..
+There is a small example target project in this repository.
+
+    $ git clone https://github.com/tarnacious/linetest.git .
+    $ virtualenv -p /usr/bin/python2.7 .
+    $ ./bin/python setup.py develop
+
+Not we can run pytest with coverage on the sample project:
+
+    $ ./bin/py.test --cov sample test_sample/
+    ===================================================== test session starts =====================================================
+    platform darwin -- Python 2.7.9 -- py-1.4.28 -- pytest-2.7.1
+    rootdir: /Users/tarn/projects/linedrop, inifile:
+    plugins: cov
+    collected 5 items
+
+    test_sample/test_add.py .
+    test_sample/test_factorial.py ....
+    --------------------------------------- coverage: platform darwin, python 2.7.9-final-0 ---------------------------------------
+    Name                        Stmts   Miss  Cover
+    -----------------------------------------------
+    sample/__init__                 0      0   100%
+    sample/factorial                9      0   100%
+    sample/subsample/__init__       0      0   100%
+    sample/subsample/add            2      0   100%
+    -----------------------------------------------
+    TOTAL                          11      0   100%
+
+    ================================================== 5 passed in 0.05 seconds ===================================================
+
+We see that all the test pass and coverage is 100% over 11 statements. We can now run the same tests with linedrop.
+
+    $ ./bin/linedrop ^sample.* test_sample/
+    Using module pattern: ^sample.*
+    Starting statement discovery.
+    Discovery complete, tests pass.
+    Completed 1 of 11 False
+    Completed 2 of 11 False
+    Completed 3 of 11 False
+    Completed 4 of 11 False
+    Completed 5 of 11 False
+    Completed 6 of 11 True
+    Completed 7 of 11 True
+    Completed 8 of 11 False
+    Completed 9 of 11 False
+    Completed 10 of 11 False
+    Completed 11 of 11 False
+    sample.factorial                                1       False   FunctionDef
+    sample.subsample.add                            1       False   FunctionDef
+    sample.subsample.add                            2       False   Return
+    sample.factorial                                3       False   If
+    sample.factorial                                4       False   Raise
+    sample.factorial                                6       True    If
+    sample.factorial                                7       True    Return
+    sample.factorial                                9       False   Assign
+    sample.factorial                                13      False   Return
+    sample.factorial                                11      False   Assign
+    sample.factorial                                10      False   For
+
+    Writing formated results to linedrop_results.txt
+    Writing results to linedrop_results.json
+
+    Done.
+
+This shows us the although lines 6 and 7 are covered, they are not required for the tests to pass. In this case they are not required at all so we might consider removing them.
 
 # How it works
 
