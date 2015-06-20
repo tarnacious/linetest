@@ -88,7 +88,24 @@ We see that all the test pass and coverage is 100% over 11 statements. We can no
 
     Done.
 
-This shows us the although lines 6 and 7 are covered, they are not required for the tests to pass. In this case they are not required at all so we might consider removing them.
+This shows us the although lines 6 and 7 are covered, they are not required for the tests to pass. Here is the module: 
+
+    1   def factorial(n):
+    2
+    3       if n < 0:
+    4           raise ValueError
+    5
+    6       if n == 0:
+    7           return 1
+    8
+    9       factorial = 1
+    10      for i in range(1, n + 1):
+    11          factorial = factorial * i
+    12
+    13      return factorial
+
+As you can see, although lines 6 and 7 are not incorrect, they are not required
+as the value 1 will be returned anyway.
 
 # How it works
 
